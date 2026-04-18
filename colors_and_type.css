@@ -1,0 +1,175 @@
+/* ============================================================
+   PADEL CENTAR HILLS — Design Tokens
+   Dark navy base + lime-green accent + white text
+   Typography: Cabinet Grotesk (display) + Satoshi (body)
+   ============================================================ */
+
+/* Fontshare CDN */
+@import url("https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800&f[]=satoshi@400,500,700&display=swap");
+
+:root {
+  /* ------- BRAND COLORS ------- */
+  --navy-900: #0a1421;       /* deepest background */
+  --navy-800: #0d1b2a;       /* base surface (spec) */
+  --navy-700: #132536;       /* elevated surface */
+  --navy-600: #1b3148;       /* card hover / border */
+  --navy-500: #25425e;       /* hairline borders */
+
+  --lime-500: #b3f000;       /* primary accent (spec) */
+  --lime-600: #9fd800;       /* accent hover */
+  --lime-400: #c5ff33;       /* accent glow */
+  --lime-300: #d9ff66;       /* soft tint */
+
+  --white:    #ffffff;
+  --ink-50:   #f6f8fa;       /* off-white text */
+  --ink-200:  #c8d0d9;       /* muted body */
+  --ink-400:  #8a96a4;       /* tertiary */
+  --ink-600:  #4a5867;       /* disabled */
+
+  /* ------- SEMANTIC COLORS ------- */
+  --bg:          var(--navy-800);
+  --bg-elev:     var(--navy-700);
+  --bg-elev-2:   var(--navy-600);
+  --fg:          var(--white);
+  --fg-muted:    var(--ink-200);
+  --fg-subtle:   var(--ink-400);
+  --accent:      var(--lime-500);
+  --accent-ink:  var(--navy-900);
+  --border:      rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.16);
+
+  /* Booking states */
+  --slot-free:     var(--lime-500);
+  --slot-free-ink: var(--navy-900);
+  --slot-booked:   #ff3b3b;
+  --slot-booked-ink: var(--white);
+  --slot-selected-border: var(--white);
+  --slot-selected-glow:   0 0 0 2px var(--white), 0 0 24px rgba(255,255,255,0.45);
+
+  /* ------- TYPOGRAPHY ------- */
+  --font-display: "Cabinet Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body:    "Satoshi", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Fluid type scale (clamp) */
+  --text-xs:   clamp(0.75rem,  0.72rem + 0.15vw, 0.82rem);
+  --text-sm:   clamp(0.875rem, 0.84rem + 0.2vw,  0.95rem);
+  --text-base: clamp(1rem,     0.96rem + 0.25vw, 1.08rem);
+  --text-md:   clamp(1.125rem, 1.06rem + 0.35vw, 1.25rem);
+  --text-lg:   clamp(1.375rem, 1.24rem + 0.6vw,  1.625rem);
+  --text-xl:   clamp(1.75rem,  1.5rem + 1.2vw,   2.25rem);
+  --text-2xl:  clamp(2.25rem,  1.9rem + 1.75vw,  3rem);
+  --text-3xl:  clamp(2.75rem,  2.2rem + 2.5vw,   3.75rem);
+  --text-hero: clamp(3.25rem,  2.4rem + 4vw,     5.75rem);
+
+  /* Line heights */
+  --lh-tight: 1.05;
+  --lh-snug:  1.2;
+  --lh-body:  1.55;
+  --lh-loose: 1.75;
+
+  /* Letter spacing */
+  --tracking-tight:  -0.02em;
+  --tracking-normal:  0;
+  --tracking-wide:    0.04em;
+  --tracking-mega:    0.12em;
+
+  /* ------- SPACING (4px base) ------- */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+  --space-32: 128px;
+
+  /* ------- RADIUS ------- */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-pill: 999px;
+
+  /* ------- SHADOW ------- */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 8px 24px rgba(0,0,0,0.35);
+  --shadow-lg: 0 20px 60px rgba(0,0,0,0.5);
+  --shadow-glow: 0 0 32px rgba(179,240,0,0.35);
+  --shadow-inset: inset 0 1px 0 rgba(255,255,255,0.04);
+
+  /* ------- MOTION ------- */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 140ms;
+  --dur-base: 240ms;
+  --dur-slow: 480ms;
+}
+
+/* Light theme */
+:root[data-theme="light"] {
+  --bg:         #f6f8fa;
+  --bg-elev:    #ffffff;
+  --bg-elev-2:  #eef1f5;
+  --fg:         #0d1b2a;
+  --fg-muted:   #3b4a5c;
+  --fg-subtle:  #6a7685;
+  --border:     rgba(13,27,42,0.08);
+  --border-strong: rgba(13,27,42,0.18);
+  --accent-ink: var(--navy-900);
+}
+
+/* ============================================================
+   SEMANTIC TEXT STYLES
+   ============================================================ */
+
+.h1 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--text-hero);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--fg);
+}
+.h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-2xl);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--tracking-tight);
+  color: var(--fg);
+}
+.h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-lg);
+  line-height: var(--lh-snug);
+  color: var(--fg);
+}
+.eyebrow {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-mega);
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.p, p {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: var(--text-base);
+  line-height: var(--lh-body);
+  color: var(--fg-muted);
+}
+.mono-stat {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--text-3xl);
+  letter-spacing: var(--tracking-tight);
+  color: var(--accent);
+}

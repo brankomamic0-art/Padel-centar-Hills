@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="hr"><head><meta charset="utf-8"><title>Form Inputs</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--bg);color:var(--fg);padding:22px;font-family:var(--font-body);}
+  label{display:block;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--fg-muted);margin-bottom:6px;}
+  input,.inp{width:100%;padding:14px 16px;border-radius:10px;background:var(--bg-elev);border:1px solid var(--border-strong);color:var(--fg);font-family:var(--font-body);font-size:15px;box-sizing:border-box;}
+  input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(179,240,0,0.22);}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .check{display:flex;gap:10px;align-items:center;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-top:12px;}
+  .box{width:18px;height:18px;border:2px solid var(--accent);border-radius:4px;position:relative;}
+  .box.c::after{content:"";position:absolute;inset:2px;background:var(--accent);border-radius:2px;}
+</style></head>
+<body>
+<div class="grid">
+  <div><label>Ime</label><input value="Marko"></div>
+  <div><label>Prezime</label><input placeholder="Prezime"></div>
+</div>
+<div style="margin-top:12px"><label>Broj mobitela</label><input placeholder="+387 6X XXX XXX"></div>
+<div class="check"><div class="box c"></div><span>Iznajmiti reket <span style="color:var(--fg-muted)">(+5,00 KM)</span></span></div>
+</body></html>

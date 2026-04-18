@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="hr"><head><meta charset="utf-8"><title>Colors — Semantic</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-body);padding:20px;}
+  .row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .sw{border-radius:12px;padding:14px;min-height:78px;display:flex;flex-direction:column;justify-content:space-between;border:1px solid var(--border);}
+  .hex{font-family:var(--font-display);font-weight:800;font-size:14px;}
+  .lbl{font-size:11px;text-transform:uppercase;letter-spacing:0.12em;opacity:0.8;}
+  h4{margin:14px 0 8px;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);font-family:var(--font-body);}
+</style></head>
+<body>
+<h4 style="margin-top:0">Booking slot states</h4>
+<div class="row">
+  <div class="sw" style="background:#b3f000;color:#0a1421;"><span class="lbl">slot — slobodan</span><span class="hex">#B3F000</span></div>
+  <div class="sw" style="background:#ff3b3b;color:#fff;"><span class="lbl">slot — zauzet</span><span class="hex">#FF3B3B</span></div>
+  <div class="sw" style="background:#132536;color:#fff;border:2px solid #fff;box-shadow:0 0 24px rgba(255,255,255,0.35);"><span class="lbl">slot — odabran</span><span class="hex">glow</span></div>
+</div>
+<h4>Text & surfaces</h4>
+<div class="row">
+  <div class="sw" style="background:#0d1b2a;color:#fff;"><span class="lbl">bg</span><span class="hex">fg — #FFFFFF</span></div>
+  <div class="sw" style="background:#132536;color:#c8d0d9;"><span class="lbl">bg-elev</span><span class="hex">fg-muted — #C8D0D9</span></div>
+  <div class="sw" style="background:#1b3148;color:#8a96a4;"><span class="lbl">bg-elev-2</span><span class="hex">fg-subtle — #8A96A4</span></div>
+</div>
+</body></html>
