@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rezervacija Terena</title>
+  <style>
+    :root {
+      --bg:       #0d1b2e;
+      --surface:  #152338;
+      --surface2: #1c2e48;
+      --accent:   #b5f000;
+      --text:     #ffffff;
+      --muted:    #8a9bb5;
+      --border:   #253a57;
+      --red:      #ff4d4d;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; min-height: 100vh; }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--surface);
+      padding: 1rem 2rem;
+      display: flex; align-items: center; gap: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    header .logo { width: 36px; height: 36px; background: var(--accent); border-radius: 8px;
+      display: grid; place-items: center; }
+    header .logo svg { color: var(--bg); }
+    header h1 { font-size: 1.2rem; font-weight: 700; }
+    .header-right { margin-left: auto; display: flex; align-items: center; gap: 1rem; }
+    .header-right span { font-size: .85rem; color: var(--muted); }
+    .btn-logout {
+      background: none; border: 1px solid var(--border); color: var(--muted);
+      border-radius: 8px; padding: .35rem .9rem; font-size: .8rem; cursor: pointer;
+    }
+    .btn-logout:hover { border-color: var(--red); color: var(--red); }
+
+    /* ── NAV TABS ── */
+    .tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--surface); padding: 0 2rem; }
+    .tab {
+      padding: .75rem 1.4rem; cursor: pointer; font-size: .9rem; color: var(--muted);
+      border-bottom: 2px solid transparent; transition: .15s; user-select: none;
+    }
+    .tab.active { color: var(--accent); border-color: var(--accent); }
+
+    /* ── PAGES ── */
+    .page { display: none; max-width: 900px; margin: 0 auto; padding: 2rem 1rem; }
+    .page.active { display: block; }
+
+    /* ── STEPPER ── */
+    .stepper { display: flex; align-items: center; margin-bottom: 2rem; }
+    .step { display: flex; align-items: center; gap: .5rem; flex: 1; }
+    .step-num {
+      width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--border);
+      display: grid; place-items: center; font-size: .85rem; font-weight: 700;
+      color: var(--muted); flex-shrink: 0;
+    }
+    .step.done .step-num  { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+    .step.active .step-num { border-color: var(--accent); color: var(--accent); }
+    .step-label { font-size: .8rem; color: var(--muted); }
+    .step.active .step-label { color: var(--text); }
+    .step-line { flex: 1; height: 1px; background: var(--border); margin: 0 .5rem; }
+
+    /* ── CARD ── */
+    .card { background: var(--surface); border-radius: 14px; padding: 1.6rem; margin-bottom: 1.2rem; border: 1px solid var(--border); }
+    .card h3 { font-size: 1rem; margin-bottom: 1.2rem; }
+
+    /* ── TERENI ── */
+    .tereni-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: .8rem; }
+    .teren-btn {
+      background: var(--surface2); border: 2px solid var(--border);
+      border-radius: 12px; padding: 1.2rem; cursor: pointer; text-align: center; transition: .15s; color: var(--text);
+    }
+    .teren-btn:hover { border-color: var(--accent); }
+    .teren-btn.selected { border-color: var(--accent); background: rgba(181,240,0,.08); }
+    .teren-btn .naziv { font-weight: 700; margin-bottom: .3rem; }
+    .teren-btn .cijena { font-size: .8rem; color: var(--muted); }
+
+    /* ── TRAJANJE ── */
+    .trajanja-row { display: flex; gap: .8rem; flex-wrap: wrap; }
+    .trajanje-btn {
+      background: var(--surface2); border: 2px solid var(--border);
+      border-radius: 10px; padding: .6rem 1.2rem; cursor: pointer; color: var(--text); font-size: .9rem; transition: .15s;
+    }
+    .trajanje-btn:hover { border-color: var(--accent); }
+    .trajanje-btn.selected { border-color: var(--accent); background: rgba(181,240,0,.08); }
+
+    /* ── TERMINI ── */
+    .termini-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: .6rem; }
+    .termin-btn {
+      background: var(--surface2); border: 2px solid var(--border);
+      border-radius: 10px; padding: .55rem; cursor: pointer; text-align: center; font-size: .85rem; color: var(--text); transition: .15s;
+    }
+    .termin-btn:hover:not(.zauzet) { border-color: var(--accent); }
+    .termin-btn.selected { border-color: var(--accent); background: rgba(181,240,0,.08); }
+    .termin-btn.zauzet { opacity: .35; cursor: not-allowed; border-style: dashed; }
+    .termin-label { font-weight: 700; }
+    .termin-do { font-size: .75rem; color: var(--muted); }
+
+    /* ── INPUTS ── */
+    input[type="date"], input[type="text"], input[type="email"], input[type="tel"], input[type="password"] {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: .65rem 1rem; color: var(--text);
+      font-size: .95rem; font-family: inherit; color-scheme: dark;
+    }
+    input[type="date"] { width: 220px; }
+    input[type="text"], input[type="email"], input[type="tel"], input[type="password"] { width: 100%; }
+    input:focus { outline: none; border-color: var(--accent); }
+    label { display: block; font-size: .78rem; font-weight: 600; color: var(--muted); margin-bottom: .3rem; }
+
+    /* ── FORMA ── */
+    .forma-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; }
+    @media (max-width: 560px) { .forma-grid { grid-template-columns: 1fr; } }
+    .forma-full { grid-column: 1 / -1; }
+
+    /* ── SAŽETAK ── */
+    .sazetak-row { display: flex; justify-content: space-between; padding: .65rem 0; border-bottom: 1px solid var(--border); font-size: .9rem; }
+    .sazetak-row:last-child { border: none; }
+    .sazetak-row .val { font-weight: 600; }
+    .ukupno { display: flex; justify-content: space-between; align-items: center; margin-top: .8rem; padding-top: .8rem; border-top: 2px solid var(--border); }
+    .ukupno .label { font-weight: 700; font-size: 1rem; }
+    .ukupno .iznos { font-size: 1.8rem; font-weight: 800; color: var(--accent); }
+
+    /* ── BUTTONS ── */
+    .btn-primary {
+      background: var(--accent); color: var(--bg); border: none;
+      border-radius: 999px; padding: .85rem 2rem; font-size: 1rem; font-weight: 700;
+      cursor: pointer; width: 100%; margin-top: 1rem;
+      display: flex; align-items: center; justify-content: center; gap: .5rem; transition: .15s;
+    }
+    .btn-primary:hover { filter: brightness(1.1); }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-secondary {
+      background: none; border: 1px solid var(--border); color: var(--muted);
+      border-radius: 999px; padding: .7rem 1.5rem; font-size: .9rem; cursor: pointer; margin-top: .8rem;
+    }
+    .btn-secondary:hover { border-color: var(--text); color: var(--text); }
+    .nav-row { display: flex; gap: .8rem; margin-top: 1.2rem; }
+    .nav-row .btn-primary { flex: 1; margin-top: 0; }
+    .nav-row .btn-secondary { margin-top: 0; }
+
+    /* ── USPJEH ── */
+    .uspjeh { text-align: center; padding: 1rem 0 2rem; }
+    .uspjeh .check-circle {
+      width: 80px; height: 80px; border-radius: 50%;
+      border: 3px solid var(--accent); display: grid; place-items: center; margin: 0 auto 1.5rem;
+    }
+    .uspjeh h2 { font-size: 1.8rem; margin-bottom: .5rem; }
+    .uspjeh p  { color: var(--muted); margin-bottom: 2rem; }
+
+    /* ── LOGIN EKRAN ── */
+    .login-wrap {
+      max-width: 400px; margin: 4rem auto; padding: 0 1rem;
+    }
+    .login-logo {
+      text-align: center; margin-bottom: 2rem;
+    }
+    .login-logo .ico {
+      width: 60px; height: 60px; background: var(--accent); border-radius: 16px;
+      display: grid; place-items: center; margin: 0 auto .8rem;
+    }
+    .login-logo h2 { font-size: 1.3rem; margin-bottom: .25rem; }
+    .login-logo p  { color: var(--muted); font-size: .9rem; }
+    .login-field { margin-bottom: 1rem; }
+    .login-err {
+      background: rgba(255,77,77,.12); color: var(--red);
+      border-radius: 8px; padding: .6rem 1rem; font-size: .85rem;
+      margin-bottom: 1rem; display: none;
+    }
+
+    /* ── ADMIN PANEL ── */
+    .admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; }
+    .admin-header h3 { font-size: 1rem; }
+    .admin-korisnik { font-size: .82rem; color: var(--muted); }
+    .admin-filters { display: flex; gap: .8rem; flex-wrap: wrap; margin-bottom: 1.2rem; align-items: center; }
+    .admin-filters input[type="date"] { width: auto; }
+    .admin-filters select {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+      padding: .6rem 1rem; color: var(--text); font-size: .9rem; color-scheme: dark;
+    }
+
+    /* ── TABLE ── */
+    table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    th { background: var(--surface2); padding: .7rem .9rem; text-align: left; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--border); }
+    td { padding: .7rem .9rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tr:last-child td { border: none; }
+    .badge { display: inline-block; padding: .2rem .6rem; border-radius: 999px; font-size: .75rem; font-weight: 700; }
+    .badge.aktivna  { background: rgba(181,240,0,.15); color: var(--accent); }
+    .badge.otkazana { background: rgba(255,77,77,.12); color: var(--red); }
+    .btn-del { background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 6px; padding: .25rem .7rem; cursor: pointer; font-size: .8rem; }
+    .btn-del:hover { border-color: var(--red); color: var(--red); }
+    .empty { text-align: center; padding: 3rem; color: var(--muted); }
+
+    /* ── STAT CHIPS ── */
+    .stat-row { display: flex; gap: .8rem; margin-bottom: 1.2rem; flex-wrap: wrap; }
+    .stat { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: .7rem 1.2rem; flex: 1; min-width: 120px; }
+    .stat .val { font-size: 1.4rem; font-weight: 800; color: var(--accent); }
+    .stat .lbl { font-size: .75rem; color: var(--muted); margin-top: .1rem; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <rect x="3" y="4" width="18" height="18" rx="2"/>
+      <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+      <line x1="3" y1="10" x2="21" y2="10"/>
+    </svg>
+  </div>
+  <h1>Rezervacija Terena</h1>
+  <div class="header-right">
+    <span id="headerTel"></span>
+    <button class="btn-logout" id="btnOdjava" style="display:none" onclick="odjava()">Odjava</button>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('rezerviraj')">Rezerviraj</div>
+  <div class="tab" onclick="switchTab('admin')">Admin</div>
+</div>
+
+<!-- ══════════════ REZERVACIJA ══════════════ -->
+<div class="page active" id="tab-rezerviraj">
+  <div class="stepper">
+    <div class="step active" id="s1">
+      <div class="step-num">1</div><div class="step-label">Teren &amp; termin</div>
+    </div>
+    <div class="step-line"></div>
+    <div class="step" id="s2">
+      <div class="step-num">2</div><div class="step-label">Vaši podaci</div>
+    </div>
+    <div class="step-line"></div>
+    <div class="step" id="s3">
+      <div class="step-num">3</div><div class="step-label">Potvrda</div>
+    </div>
+  </div>
+
+  <!-- KORAK 1 -->
+  <div id="korak1">
+    <div class="card">
+      <h3>Odabir terena</h3>
+      <div class="tereni-grid" id="tereniGrid"></div>
+    </div>
+    <div class="card">
+      <h3>Trajanje</h3>
+      <div class="trajanja-row" id="trajanjaRow"></div>
+    </div>
+    <div class="card">
+      <h3>Datum i slobodni termini</h3>
+      <input type="date" id="datumPicker" style="margin-bottom:1rem" />
+      <div class="termini-grid" id="terminiGrid">
+        <p style="color:var(--muted);font-size:.9rem">Odaberite teren, trajanje i datum.</p>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-primary" onclick="korak1Dalje()">Dalje &rarr;</button>
+    </div>
+  </div>
+
+  <!-- KORAK 2 -->
+  <div id="korak2" style="display:none">
+    <div class="card">
+      <h3>Vaši podaci</h3>
+      <div class="forma-grid">
+        <div>
+          <label>IME I PREZIME *</label>
+          <input type="text" id="ime" placeholder="npr. Marko Marković" />
+        </div>
+        <div>
+          <label>EMAIL *</label>
+          <input type="email" id="email" placeholder="marko@example.com" />
+        </div>
+        <div class="forma-full">
+          <label>TELEFON</label>
+          <input type="tel" id="telefon" placeholder="+387 61 000 000" />
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Pregled odabira</h3>
+      <div id="sazetakK2"></div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-secondary" onclick="idi(1)">&#8592; Natrag</button>
+      <button class="btn-primary" onclick="korak2Dalje()">Potvrdi rezervaciju</button>
+    </div>
+  </div>
+
+  <!-- KORAK 3 – USPJEH -->
+  <div id="korak3" style="display:none">
+    <div class="card uspjeh">
+      <div class="check-circle">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <h2>Rezervacija zaprimljena!</h2>
+      <p>Molimo vas pošaljite potvrdu vlasniku klikom na gumb ispod.</p>
+      <div class="card" style="text-align:left;background:var(--surface2)">
+        <div id="sazetakK3"></div>
+        <div class="ukupno">
+          <span class="label">UKUPNO</span>
+          <span class="iznos" id="ukupnoIznos"></span>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="posaljiEmail()" style="margin-top:1.5rem">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,12 2,6"/>
+        </svg>
+        Pošalji potvrdu rezervacije emailom
+      </button>
+      <p style="color:var(--muted);margin-top:1rem;font-size:.9rem">
+        Ili nazovite: <a id="vlasnikTel" href="#" style="color:var(--accent);font-weight:700;text-decoration:none"></a>
+      </p>
+      <button class="btn-secondary" onclick="resetiraj()" style="margin-top:1rem">Nova rezervacija</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ ADMIN ══════════════ -->
+<div class="page" id="tab-admin">
+
+  <!-- LOGIN EKRAN -->
+  <div id="adminLogin" class="login-wrap">
+    <div class="login-logo">
+      <div class="ico">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0d1b2e" stroke-width="2.5">
+          <path d="M12 2a5 5 0 1 0 0 10A5 5 0 0 0 12 2z"/>
+          <path d="M2 20c0-4 4.5-7 10-7s10 3 10 7"/>
+        </svg>
+      </div>
+      <h2>Admin prijava</h2>
+      <p>Pristup za vlasnike terena</p>
+    </div>
+    <div class="card">
+      <div class="login-err" id="loginErr"></div>
+      <div class="login-field">
+        <label>KORISNIČKO IME</label>
+        <input type="text" id="loginUser" placeholder="admin" autocomplete="username" />
+      </div>
+      <div class="login-field">
+        <label>LOZINKA</label>
+        <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password"
+               onkeydown="if(event.key==='Enter') prijava()" />
+      </div>
+      <button class="btn-primary" onclick="prijava()" id="btnPrijava">Prijavi se</button>
+    </div>
+  </div>
+
+  <!-- ADMIN PANEL (prikazan nakon prijave) -->
+  <div id="adminPanel" style="display:none">
+    <div class="card">
+      <div class="admin-header">
+        <h3>Pregled rezervacija</h3>
+        <span class="admin-korisnik" id="adminKorisnik"></span>
+      </div>
+      <div class="stat-row" id="statRow"></div>
+      <div class="admin-filters">
+        <input type="date" id="adminDatum" />
+        <select id="adminTeren">
+          <option value="">Svi tereni</option>
+        </select>
+        <select id="adminStatus">
+          <option value="">Svi statusi</option>
+          <option value="aktivna">Aktivne</option>
+          <option value="otkazana">Otkazane</option>
+        </select>
+        <button class="btn-secondary" style="margin:0" onclick="ucitajAdmin()">Filtriraj</button>
+        <button class="btn-secondary" style="margin:0" onclick="resetFilters()">Sve</button>
+      </div>
+      <div id="adminTablica"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const S = { teren: null, trajanje: null, datum: '', pocetak: null, kraj: null, novaRez: null };
+let TERENI = [], VLASNIK_TEL = '', prijavljenKao = null;
+
+// ── INIT ────────────────────────────────────────────────────────────────────
+async function init() {
+  const [tereniRes, trajanjaRes, cfgRes, meRes] = await Promise.all([
+    fetch('/api/tereni').then(r => r.json()),
+    fetch('/api/trajanja').then(r => r.json()),
+    fetch('/api/config').then(r => r.json()),
+    fetch('/api/me').then(r => r.json()),
+  ]);
+
+  TERENI = tereniRes;
+  VLASNIK_TEL = cfgRes.vlasnik_tel || '';
+  document.getElementById('headerTel').textContent = VLASNIK_TEL;
+  document.getElementById('vlasnikTel').textContent = VLASNIK_TEL;
+  document.getElementById('vlasnikTel').href = 'tel:' + VLASNIK_TEL.replace(/\s/g,'');
+
+  // tereni grid
+  document.getElementById('tereniGrid').innerHTML = TERENI.map(t => `
+    <div class="teren-btn" onclick="odaberiTeren(${t.id})" id="teren-${t.id}">
+      <div class="naziv">${t.naziv}</div>
+      <div class="cijena">${t.cijena_po_satu.toFixed(2)} KM / sat</div>
+    </div>`).join('');
+
+  // trajanja
+  document.getElementById('trajanjaRow').innerHTML = trajanjaRes.map(t => `
+    <div class="trajanje-btn" onclick="odaberiTrajanje(${t.minuta})" id="traj-${t.minuta}">${t.label}</div>`).join('');
+
+  // datum
+  const danas = new Date().toISOString().slice(0,10);
+  document.getElementById('datumPicker').value = danas;
+  document.getElementById('datumPicker').min = danas;
+  S.datum = danas;
+  document.getElementById('datumPicker').addEventListener('change', e => { S.datum = e.target.value; ucitajTermine(); });
+
+  // admin select
+  const sel = document.getElementById('adminTeren');
+  TERENI.forEach(t => sel.innerHTML += `<option value="${t.id}">${t.naziv}</option>`);
+  document.getElementById('adminDatum').value = danas;
+
+  // provjeri je li već prijavljen
+  if (meRes.prijavljen) {
+    prijavljenKao = meRes.korisnik;
+    prikaziAdminPanel();
+  }
+}
+
+// ── BOOKING ─────────────────────────────────────────────────────────────────
+function odaberiTeren(id) {
+  S.teren = TERENI.find(t => t.id === id);
+  document.querySelectorAll('.teren-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('teren-' + id).classList.add('selected');
+  ucitajTermine();
+}
+
+function odaberiTrajanje(min) {
+  S.trajanje = min;
+  document.querySelectorAll('.trajanje-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('traj-' + min).classList.add('selected');
+  ucitajTermine();
+}
+
+async function ucitajTermine() {
+  if (!S.teren || !S.trajanje || !S.datum) return;
+  const termini = await fetch(`/api/slobodni-termini?datum=${S.datum}&teren_id=${S.teren.id}&trajanje=${S.trajanje}`).then(r => r.json());
+  document.getElementById('terminiGrid').innerHTML = termini.map(t => `
+    <div class="termin-btn ${t.slobodan ? '' : 'zauzet'} ${S.pocetak===t.pocetak?'selected':''}"
+         onclick="${t.slobodan ? `odaberiTermin('${t.pocetak}','${t.kraj}',this)` : ''}">
+      <div class="termin-label">${t.pocetak}</div>
+      <div class="termin-do">do ${t.kraj}</div>
+    </div>`).join('');
+}
+
+function odaberiTermin(poc, kraj, el) {
+  S.pocetak = poc; S.kraj = kraj;
+  document.querySelectorAll('.termin-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function idi(br) {
+  ['korak1','korak2','korak3'].forEach((k,i) => document.getElementById(k).style.display = i+1===br?'block':'none');
+  ['s1','s2','s3'].forEach((s,i) => {
+    const el = document.getElementById(s);
+    el.classList.remove('active','done');
+    if (i+1 < br) el.classList.add('done');
+    if (i+1 === br) el.classList.add('active');
+  });
+}
+
+function korak1Dalje() {
+  if (!S.teren)   { alert('Odaberite teren.'); return; }
+  if (!S.trajanje){ alert('Odaberite trajanje.'); return; }
+  if (!S.pocetak) { alert('Odaberite termin.'); return; }
+  renderSazetak('sazetakK2'); idi(2);
+}
+
+async function korak2Dalje() {
+  const ime     = document.getElementById('ime').value.trim();
+  const email   = document.getElementById('email').value.trim();
+  const telefon = document.getElementById('telefon').value.trim();
+  if (!ime || !email) { alert('Unesite ime i email.'); return; }
+
+  const res = await fetch('/api/rezervacije', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ ime, email, telefon, datum: S.datum,
+                           pocetak: S.pocetak, trajanje: S.trajanje, teren_id: S.teren.id })
+  });
+  if (!res.ok) { alert((await res.json()).detail || 'Greška.'); return; }
+  S.novaRez = await res.json();
+  renderSazetak('sazetakK3');
+  document.getElementById('ukupnoIznos').textContent = (S.teren.cijena_po_satu * S.trajanje / 60).toFixed(2) + ' KM';
+  idi(3);
+}
+
+function renderSazetak(elId) {
+  const cijena = S.teren.cijena_po_satu * S.trajanje / 60;
+  const datumHr = new Date(S.datum+'T12:00:00').toLocaleDateString('hr-HR',{day:'numeric',month:'long',year:'numeric'});
+  document.getElementById(elId).innerHTML = `
+    <div class="sazetak-row"><span>Datum</span><span class="val">${datumHr}</span></div>
+    <div class="sazetak-row"><span>Teren</span><span class="val">${S.teren.naziv}</span></div>
+    <div class="sazetak-row"><span>Termin</span><span class="val">${S.pocetak} – ${S.kraj}</span></div>
+    <div class="sazetak-row"><span>Trajanje</span><span class="val">${S.trajanje} min</span></div>
+    <div class="sazetak-row"><span>Cijena</span><span class="val">${cijena.toFixed(2)} KM</span></div>`;
+}
+
+function posaljiEmail() {
+  if (!S.novaRez) return;
+  const sub  = encodeURIComponent(`Potvrda rezervacije – ${S.novaRez.datum}`);
+  const body = encodeURIComponent(
+    `Zdravo,\n\nPotvrđujem rezervaciju:\n\nTeren: ${S.novaRez.teren_naziv}\nDatum: ${S.novaRez.datum}\nTermin: ${S.novaRez.pocetak} – ${S.novaRez.kraj}\nTrajanje: ${S.novaRez.trajanje} min\nCijena: ${S.novaRez.cijena.toFixed(2)} KM\n\nHvala!`
+  );
+  window.open(`mailto:?subject=${sub}&body=${body}`);
+}
+
+function resetiraj() {
+  S.teren = null; S.trajanje = null; S.datum = ''; S.pocetak = null; S.kraj = null; S.novaRez = null;
+  document.querySelectorAll('.teren-btn,.trajanje-btn,.termin-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('terminiGrid').innerHTML = '<p style="color:var(--muted);font-size:.9rem">Odaberite teren, trajanje i datum.</p>';
+  ['ime','email','telefon'].forEach(id => document.getElementById(id).value = '');
+  const danas = new Date().toISOString().slice(0,10);
+  document.getElementById('datumPicker').value = danas;
+  S.datum = danas; idi(1);
+}
+
+// ── AUTH ────────────────────────────────────────────────────────────────────
+async function prijava() {
+  const btn  = document.getElementById('btnPrijava');
+  const err  = document.getElementById('loginErr');
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  if (!user || !pass) { prikaziErr('Unesite korisničko ime i lozinku.'); return; }
+
+  btn.disabled = true; btn.textContent = 'Prijava...';
+  const res = await fetch('/api/login', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ korisnicko_ime: user, lozinka: pass })
+  });
+  btn.disabled = false; btn.textContent = 'Prijavi se';
+
+  if (!res.ok) {
+    prikaziErr((await res.json()).detail || 'Pogrešni podaci.');
+    document.getElementById('loginPass').value = '';
+    return;
+  }
+  const data = await res.json();
+  prijavljenKao = data.korisnik;
+  err.style.display = 'none';
+  prikaziAdminPanel();
+}
+
+function prikaziErr(tekst) {
+  const el = document.getElementById('loginErr');
+  el.textContent = tekst; el.style.display = 'block';
+}
+
+async function odjava() {
+  await fetch('/api/logout', { method: 'POST' });
+  prijavljenKao = null;
+  document.getElementById('adminPanel').style.display = 'none';
+  document.getElementById('adminLogin').style.display = 'block';
+  document.getElementById('btnOdjava').style.display = 'none';
+  document.getElementById('loginPass').value = '';
+}
+
+function prikaziAdminPanel() {
+  document.getElementById('adminLogin').style.display = 'none';
+  document.getElementById('adminPanel').style.display = 'block';
+  document.getElementById('btnOdjava').style.display = 'inline-block';
+  document.getElementById('adminKorisnik').textContent = '👤 ' + prijavljenKao;
+  ucitajAdmin();
+}
+
+// ── TABS ────────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['rezerviraj','admin'][i] === tab));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'admin' && prijavljenKao) ucitajAdmin();
+}
+
+// ── ADMIN ────────────────────────────────────────────────────────────────────
+async function ucitajAdmin() {
+  const datum    = document.getElementById('adminDatum').value;
+  const terenId  = document.getElementById('adminTeren').value;
+  const statusF  = document.getElementById('adminStatus').value;
+  let url = '/api/rezervacije?x=1';
+  if (datum)   url += `&datum=${datum}`;
+  if (terenId) url += `&teren_id=${terenId}`;
+
+  const res = await fetch(url);
+  if (res.status === 401) { odjava(); return; }
+  let lista = await res.json();
+  if (statusF) lista = lista.filter(r => r.status === statusF);
+
+  // statistike
+  const aktivne = lista.filter(r => r.status === 'aktivna');
+  const prihod  = aktivne.reduce((s, r) => s + r.cijena, 0);
+  document.getElementById('statRow').innerHTML = `
+    <div class="stat"><div class="val">${lista.length}</div><div class="lbl">Ukupno rezervacija</div></div>
+    <div class="stat"><div class="val">${aktivne.length}</div><div class="lbl">Aktivnih</div></div>
+    <div class="stat"><div class="val">${prihod.toFixed(2)} KM</div><div class="lbl">Prihod (aktivne)</div></div>`;
+
+  const el = document.getElementById('adminTablica');
+  if (!lista.length) { el.innerHTML = '<p class="empty">Nema rezervacija.</p>'; return; }
+  el.innerHTML = `
+    <table>
+      <thead><tr>
+        <th>Gost</th><th>Datum</th><th>Termin</th><th>Teren</th><th>Cijena</th><th>Status</th><th></th>
+      </tr></thead>
+      <tbody>
+        ${lista.map(r => `
+          <tr>
+            <td><strong>${esc(r.ime)}</strong><br><small style="color:var(--muted)">${esc(r.email)}</small>
+                ${r.telefon ? `<br><small style="color:var(--muted)">${esc(r.telefon)}</small>` : ''}</td>
+            <td>${r.datum}</td>
+            <td>${r.pocetak} – ${r.kraj}<br><small style="color:var(--muted)">${r.trajanje} min</small></td>
+            <td>${esc(r.teren_naziv)}</td>
+            <td>${r.cijena.toFixed(2)} KM</td>
+            <td><span class="badge ${r.status}">${r.status}</span></td>
+            <td>${r.status==='aktivna' ? `<button class="btn-del" onclick="otkazi(${r.id})">Otkaži</button>` : ''}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+function resetFilters() {
+  document.getElementById('adminDatum').value = '';
+  document.getElementById('adminTeren').value = '';
+  document.getElementById('adminStatus').value = '';
+  ucitajAdmin();
+}
+
+async function otkazi(id) {
+  if (!confirm('Otkazati rezervaciju?')) return;
+  const res = await fetch(`/api/rezervacije/${id}`, { method: 'DELETE' });
+  if (res.status === 401) { odjava(); return; }
+  ucitajAdmin();
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+init();
+</script>
+</body>
+</html>
