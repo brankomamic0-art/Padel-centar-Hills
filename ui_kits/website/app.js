@@ -311,16 +311,37 @@ document.getElementById("racket-check").addEventListener("change", (e) => {
   state.racket = e.target.checked;
   updateSummary();
 });
-document.getElementById("booking-form").addEventListener("submit", (e) => {
+document.getElementById("booking-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const fd = new FormData(e.target);
-  state.name = fd.get("name").toString().trim();
+  state.name    = fd.get("name").toString().trim();
   state.surname = fd.get("surname").toString().trim();
-  state.phone = fd.get("phone").toString().trim();
-  state.racket = !!fd.get("racket");
-  // mark booking as taken immediately
+  state.phone   = fd.get("phone").toString().trim();
+  state.racket  = !!fd.get("racket");
+
+  // Mark slot as taken in local state
   const dateStr = fmtDateKey(state.date);
   bookings.set(bkKey(dateStr, state.duration, state.startTime, state.courtIdx), true);
+
+  // Persist to server (fire-and-forget — don't block UX on failure)
+  const [startH] = state.startTime.split(":").map(Number);
+  fetch("/api/booking", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name:      state.name,
+      surname:   state.surname,
+      phone:     state.phone,
+      date:      fmtDate(state.date),
+      court:     COURTS[state.courtIdx],
+      startTime: state.startTime,
+      endTime:   calcEndTime(),
+      duration:  state.duration,
+      price:     priceFor(state.date, startH, state.duration),
+      racket:    state.racket,
+    }),
+  }).catch(() => {});
+
   goStep(5);
 });
 
@@ -484,3 +505,8 @@ kfForm?.addEventListener("submit", async (e) => {
 renderCalendar();
 // Init Lucide after DOM ready
 if (window.lucide) lucide.createIcons();
+
+// ----- PWA Service Worker -----
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
+}
