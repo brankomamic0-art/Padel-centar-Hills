@@ -327,29 +327,157 @@ document.getElementById("booking-form").addEventListener("submit", (e) => {
 // ----- Step 5: Success -----
 function renderSuccessStep(){
   updateSummary("-success");
-  const price = currentPrice();
-  const total = price + (state.racket ? 5 : 0);
-  const body = [
-    "Nova rezervacija primljena:",
-    "",
-    `Ime i prezime: ${state.name} ${state.surname}`,
-    `Broj mobitela: ${state.phone}`,
-    `Datum: ${fmtDate(state.date)}`,
-    `Teren: ${COURTS[state.courtIdx]}`,
-    `Termin: ${state.startTime} – ${calcEndTime()}`,
-    `Trajanje: ${state.duration} min`,
-    `Iznajmljivanje reketa: ${state.racket ? "Da" : "Ne"}`,
-    `Ukupna cijena: ${total},00 KM`,
-    "",
-    "Padel centar Hills rezervacijski sustav"
-  ].join("\n");
-  const mailto = `mailto:${OWNER_EMAIL}?subject=${encodeURIComponent("Nova rezervacija – Padel centar Hills")}&body=${encodeURIComponent(body)}`;
-  document.getElementById("mail-btn").href = mailto;
+
+  const mailBtn    = document.getElementById("mail-btn");
+  const sendStatus = document.getElementById("booking-send-status");
+
+  // Reset button state each time we arrive at step 5
+  mailBtn.disabled = false;
+  mailBtn.innerHTML = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="m22 6-10 7L2 6"/></svg> Pošalji potvrdu rezervacije emailom`;
+  sendStatus.textContent = "";
+  sendStatus.className   = "";
+
+  // Remove any previous listener by replacing the node
+  const newBtn = mailBtn.cloneNode(true);
+  mailBtn.parentNode.replaceChild(newBtn, mailBtn);
+
+  newBtn.addEventListener("click", async () => {
+    const price = currentPrice();
+    const total = price + (state.racket ? 5 : 0);
+
+    newBtn.disabled = true;
+    newBtn.innerHTML = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="m22 6-10 7L2 6"/></svg> Šaljem…`;
+    sendStatus.textContent = "";
+    sendStatus.className   = "";
+
+    const html = `
+      <h2 style="font-family:sans-serif;margin:0 0 16px;color:#0d1b2a">Nova rezervacija — Padel centar Hills</h2>
+      <table style="font-family:sans-serif;font-size:15px;border-collapse:collapse;width:100%;max-width:520px">
+        <tr><td style="padding:8px 12px;background:#f6f8fa;font-weight:600;width:160px">Ime i prezime</td><td style="padding:8px 12px">${state.name} ${state.surname}</td></tr>
+        <tr><td style="padding:8px 12px;background:#f6f8fa;font-weight:600">Broj mobitela</td><td style="padding:8px 12px">${state.phone || "—"}</td></tr>
+        <tr><td style="padding:8px 12px;background:#f6f8fa;font-weight:600">Datum</td><td style="padding:8px 12px">${fmtDate(state.date)}</td></tr>
+        <tr><td style="padding:8px 12px;background:#f6f8fa;font-weight:600">Teren</td><td style="padding:8px 12px">${COURTS[state.courtIdx]}</td></tr>
+        <tr><td style="padding:8px 12px;background:#f6f8fa;font-weight:600">Termin</td><td style="padding:8px 12px">${state.startTime} – ${calcEndTime()}</td></tr>
+        <tr><td style="padding:8px 12px;background:#f6f8fa;font-weight:600">Trajanje</td><td style="padding:8px 12px">${state.duration} min</td></tr>
+        <tr><td style="padding:8px 12px;background:#f6f8fa;font-weight:600">Iznajmiti reket</td><td style="padding:8px 12px">${state.racket ? "Da (+5,00 KM)" : "Ne"}</td></tr>
+        <tr style="background:#b3f000"><td style="padding:10px 12px;font-weight:800;font-size:16px">Ukupno</td><td style="padding:10px 12px;font-weight:800;font-size:16px">${total},00 KM</td></tr>
+      </table>
+      <p style="font-family:sans-serif;color:#888;font-size:12px;margin-top:24px">Padel centar Hills · Butmirska cesta 18, Ilidža, Sarajevo · +387 61 532 892</p>
+    `;
+
+    try {
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${RESEND_KEY}`,
+        },
+        body: JSON.stringify({
+          from: FROM_ADDR,
+          to: [CONTACT_TO],
+          subject: `Nova rezervacija — ${state.name} ${state.surname} · ${fmtDate(state.date)} · ${COURTS[state.courtIdx]}`,
+          html,
+        }),
+      });
+
+      if (res.ok) {
+        sendStatus.style.cssText = "padding:10px 14px;background:rgba(179,240,0,.1);border:1px solid rgba(179,240,0,.3);color:#b3f000;border-radius:8px;";
+        sendStatus.textContent = "✓ Potvrda uspješno poslana!";
+        newBtn.disabled = true;
+        newBtn.innerHTML = `✓ Poslano`;
+      } else {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || res.status);
+      }
+    } catch (err) {
+      sendStatus.style.cssText = "padding:10px 14px;background:rgba(255,59,59,.1);border:1px solid rgba(255,59,59,.3);color:#ff7070;border-radius:8px;";
+      sendStatus.textContent = `Greška pri slanju. Molimo nazovite: +387 61 532 892`;
+      newBtn.disabled = false;
+      newBtn.innerHTML = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="m22 6-10 7L2 6"/></svg> Pokušaj ponovo`;
+    }
+  });
 }
 document.getElementById("reset-btn").addEventListener("click", () => {
   Object.assign(state, { step:1, date:null, duration:null, courtIdx:null, startTime:null, name:"", surname:"", phone:"", racket:false });
   renderCalendar();
   goStep(1);
+});
+
+// ===========================================================
+// CONTACT FORM — Resend API
+// ===========================================================
+
+const RESEND_KEY = "re_eZu4mNme_Kgpp1EYwcYAffevBDLtQYyy6";
+const CONTACT_TO = "jurej2750@gmail.com";
+const FROM_ADDR  = "Padel centar Hills <onboarding@resend.dev>";
+
+const kfForm   = document.getElementById("kontakt-form");
+const kfSubmit = document.getElementById("kf-submit");
+const kfStatus = document.getElementById("kf-status");
+
+function setStatus(type, msg) {
+  kfStatus.className = "kf-status " + type;
+  kfStatus.textContent = msg;
+}
+
+kfForm?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const name    = fd.get("name").toString().trim();
+  const email   = fd.get("email").toString().trim();
+  const phone   = fd.get("phone").toString().trim();
+  const message = fd.get("message").toString().trim();
+
+  if (!name || !email || !message) {
+    setStatus("err", "Molimo popunite sva obavezna polja.");
+    return;
+  }
+
+  kfSubmit.disabled = true;
+  kfSubmit.textContent = "Šaljem…";
+  kfStatus.className = "kf-status";
+  kfStatus.textContent = "";
+
+  const html = `
+    <h2 style="font-family:sans-serif;margin:0 0 16px">Nova poruka s web forme — Padel centar Hills</h2>
+    <table style="font-family:sans-serif;font-size:15px;border-collapse:collapse;width:100%;max-width:520px">
+      <tr><td style="padding:8px 12px;background:#f6f8fa;font-weight:600;width:140px">Ime i prezime</td><td style="padding:8px 12px">${name}</td></tr>
+      <tr><td style="padding:8px 12px;background:#f6f8fa;font-weight:600">Email</td><td style="padding:8px 12px"><a href="mailto:${email}">${email}</a></td></tr>
+      <tr><td style="padding:8px 12px;background:#f6f8fa;font-weight:600">Telefon</td><td style="padding:8px 12px">${phone || "—"}</td></tr>
+      <tr><td style="padding:8px 12px;background:#f6f8fa;font-weight:600;vertical-align:top">Poruka</td><td style="padding:8px 12px;white-space:pre-wrap">${message.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</td></tr>
+    </table>
+    <p style="font-family:sans-serif;color:#888;font-size:12px;margin-top:24px">Padel centar Hills · Butmirska cesta 18, Ilidža, Sarajevo</p>
+  `;
+
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${RESEND_KEY}`,
+      },
+      body: JSON.stringify({
+        from: FROM_ADDR,
+        to: [CONTACT_TO],
+        reply_to: email,
+        subject: `Nova poruka od ${name} — Padel centar Hills`,
+        html,
+      }),
+    });
+
+    if (res.ok) {
+      setStatus("ok", "Poruka uspješno poslana! Javit ćemo vam se uskoro.");
+      kfForm.reset();
+    } else {
+      const err = await res.json().catch(() => ({}));
+      setStatus("err", `Greška pri slanju: ${err.message || res.status}. Pokušajte nazvati: +387 61 532 892`);
+    }
+  } catch (err) {
+    setStatus("err", "Mrežna greška. Molimo nazovite: +387 61 532 892");
+  } finally {
+    kfSubmit.disabled = false;
+    kfSubmit.innerHTML = `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M22 2 11 13M22 2 15 22l-4-9-9-4 20-7z"/></svg> Pošalji poruku`;
+  }
 });
 
 // ----- Init -----

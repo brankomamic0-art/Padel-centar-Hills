@@ -303,10 +303,11 @@
           <h3 style="font-family:var(--font-display);font-weight:800;font-size:var(--text-xl);margin-bottom:10px;">Rezervacija zaprimljena!</h3>
           <p style="max-width:46ch;margin:0 auto var(--space-6)">Molimo vas pošaljite potvrdu vlasniku klikom na gumb ispod.</p>
           <div id="summary-success" class="summary" style="text-align:left;max-width:480px;margin:0 auto var(--space-6)"></div>
-          <a id="mail-btn" class="btn btn-primary btn-block" style="max-width:420px;margin:0 auto" href="#">
+          <button id="mail-btn" class="btn btn-primary btn-block" style="max-width:420px;margin:0 auto" type="button">
             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="m22 6-10 7L2 6"/></svg>
             Pošalji potvrdu rezervacije emailom
-          </a>
+          </button>
+          <div id="booking-send-status" aria-live="polite" style="margin-top:12px;font-size:14px;min-height:0;"></div>
           <p style="margin-top:var(--space-6);color:var(--fg-muted);font-size:var(--text-sm)">Ili nazovite: <a href="tel:+38761532892" style="color:var(--accent);font-weight:700">+387 61 532 892</a></p>
           <button id="reset-btn" class="btn btn-secondary" style="margin-top:var(--space-6)">Nova rezervacija</button>
         </div>
@@ -444,6 +445,25 @@
       <span class="eyebrow">Kontakt</span>
       <h2>Dođi, igraj, ostani.</h2>
     </div>
+    <!-- Contact form -->
+    <div class="kontakt-form-wrap reveal">
+      <form id="kontakt-form" novalidate>
+        <div class="form-grid">
+          <div class="field"><label for="kf-name">Ime i prezime</label><input id="kf-name" name="name" type="text" required autocomplete="name" placeholder="Marko Marković"></div>
+          <div class="field"><label for="kf-email">Email adresa</label><input id="kf-email" name="email" type="email" required autocomplete="email" placeholder="marko@email.com"></div>
+        </div>
+        <div class="field" style="margin-top:16px"><label for="kf-phone">Broj mobitela <span style="color:var(--fg-subtle);font-weight:400;text-transform:none;letter-spacing:0">(opcionalno)</span></label><input id="kf-phone" name="phone" type="tel" autocomplete="tel" placeholder="+387 6X XXX XXX"></div>
+        <div class="field" style="margin-top:16px"><label for="kf-msg">Poruka</label><textarea id="kf-msg" name="message" rows="5" required placeholder="Zanima me..."></textarea></div>
+        <div id="kf-status" class="kf-status" aria-live="polite"></div>
+        <div style="margin-top:var(--space-6);display:flex;justify-content:flex-end">
+          <button type="submit" id="kf-submit" class="btn btn-primary" style="min-width:200px">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M22 2 11 13M22 2 15 22l-4-9-9-4 20-7z"/></svg>
+            Pošalji poruku
+          </button>
+        </div>
+      </form>
+    </div>
+
     <div class="kontakt-wrap">
       <div class="kontakt-info">
         <div class="kontakt-row">
