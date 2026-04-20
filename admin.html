@@ -322,8 +322,10 @@ function renderList(containerId, data, filter) {
       <div class="card-footer">
         <span class="card-meta">Primljeno: ${date}</span>
         <div class="card-actions">
-          ${c.status !== 'accepted' ? `<button class="action-btn accept" onclick="setStatus('${c.id}','accepted')">✓ Prihvati</button>` : ''}
-          ${c.status !== 'rejected' ? `<button class="action-btn reject" onclick="setStatus('${c.id}','rejected')">✕ Odbij</button>` : ''}
+          ${containerId === 'list-bookings'
+            ? (c.status !== 'accepted' ? `<button class="action-btn accept" onclick="setStatus('${c.id}','accepted')">✓ Prihvati</button>` : '')
+            + (c.status !== 'rejected' ? `<button class="action-btn reject" onclick="setStatus('${c.id}','rejected')">✕ Odbij</button>` : '')
+            : ''}
           <button class="action-btn del" onclick="del('${c.id}')">Obriši</button>
         </div>
       </div>
