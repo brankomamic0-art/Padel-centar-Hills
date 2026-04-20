@@ -1,12 +1,15 @@
 {
   "name": "padel-centar-hills",
   "version": "1.0.0",
-  "main": "server.js",
+  "description": "Padel centar Hills – static marketing site",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "start": "serve ui_kits/website -l ${PORT:-3000} --no-clipboard",
+    "build": "echo 'Static site – nothing to build.'"
   },
   "dependencies": {
-    "express": "^4.19.2"
+    "serve": "^14.2.4"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
