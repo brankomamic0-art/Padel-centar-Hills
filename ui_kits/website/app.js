@@ -314,88 +314,40 @@ document.getElementById("racket-check").addEventListener("change", (e) => {
 document.getElementById("booking-form").addEventListener("submit", (e) => {
   e.preventDefault();
   const fd = new FormData(e.target);
-  state.name = fd.get("name").toString().trim();
+  state.name    = fd.get("name").toString().trim();
   state.surname = fd.get("surname").toString().trim();
-  state.phone = fd.get("phone").toString().trim();
-  state.racket = !!fd.get("racket");
-  // mark booking as taken immediately
+  state.phone   = fd.get("phone").toString().trim();
+  state.racket  = !!fd.get("racket");
+
+  // Mark slot as taken in local state
   const dateStr = fmtDateKey(state.date);
   bookings.set(bkKey(dateStr, state.duration, state.startTime, state.courtIdx), true);
+
+  // Save to server so admin panel can see it
+  const price = currentPrice();
+  const total = price + (state.racket ? 5 : 0);
+  fetch("/api/contact", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name:    `${state.name} ${state.surname}`,
+      email:   "",
+      phone:   state.phone,
+      message: `REZERVACIJA TERENA\nTeren: ${COURTS[state.courtIdx]}\nDatum: ${fmtDate(state.date)}\nTermin: ${state.startTime} – ${calcEndTime()}\nTrajanje: ${state.duration} min\nCijena: ${price},00 KM${state.racket ? "\nReket: Da (+5,00 KM)" : ""}\nUKUPNO: ${total},00 KM`,
+    }),
+  }).catch(() => {});
+
   goStep(5);
 });
 
 // ----- Step 5: Success -----
 function renderSuccessStep(){
   updateSummary("-success");
-
+  // Hide the email button — admin handles confirmations now
   const mailBtn    = document.getElementById("mail-btn");
   const sendStatus = document.getElementById("booking-send-status");
-
-  // Reset button state each time we arrive at step 5
-  mailBtn.disabled = false;
-  mailBtn.innerHTML = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="m22 6-10 7L2 6"/></svg> Pošalji potvrdu rezervacije emailom`;
-  sendStatus.textContent = "";
-  sendStatus.className   = "";
-
-  // Remove any previous listener by replacing the node
-  const newBtn = mailBtn.cloneNode(true);
-  mailBtn.parentNode.replaceChild(newBtn, mailBtn);
-
-  newBtn.addEventListener("click", async () => {
-    const price = currentPrice();
-    const total = price + (state.racket ? 5 : 0);
-
-    newBtn.disabled = true;
-    newBtn.innerHTML = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="m22 6-10 7L2 6"/></svg> Šaljem…`;
-    sendStatus.textContent = "";
-    sendStatus.className   = "";
-
-    const html = `
-      <h2 style="font-family:sans-serif;margin:0 0 16px;color:#0d1b2a">Nova rezervacija — Padel centar Hills</h2>
-      <table style="font-family:sans-serif;font-size:15px;border-collapse:collapse;width:100%;max-width:520px">
-        <tr><td style="padding:8px 12px;background:#f6f8fa;font-weight:600;width:160px">Ime i prezime</td><td style="padding:8px 12px">${state.name} ${state.surname}</td></tr>
-        <tr><td style="padding:8px 12px;background:#f6f8fa;font-weight:600">Broj mobitela</td><td style="padding:8px 12px">${state.phone || "—"}</td></tr>
-        <tr><td style="padding:8px 12px;background:#f6f8fa;font-weight:600">Datum</td><td style="padding:8px 12px">${fmtDate(state.date)}</td></tr>
-        <tr><td style="padding:8px 12px;background:#f6f8fa;font-weight:600">Teren</td><td style="padding:8px 12px">${COURTS[state.courtIdx]}</td></tr>
-        <tr><td style="padding:8px 12px;background:#f6f8fa;font-weight:600">Termin</td><td style="padding:8px 12px">${state.startTime} – ${calcEndTime()}</td></tr>
-        <tr><td style="padding:8px 12px;background:#f6f8fa;font-weight:600">Trajanje</td><td style="padding:8px 12px">${state.duration} min</td></tr>
-        <tr><td style="padding:8px 12px;background:#f6f8fa;font-weight:600">Iznajmiti reket</td><td style="padding:8px 12px">${state.racket ? "Da (+5,00 KM)" : "Ne"}</td></tr>
-        <tr style="background:#b3f000"><td style="padding:10px 12px;font-weight:800;font-size:16px">Ukupno</td><td style="padding:10px 12px;font-weight:800;font-size:16px">${total},00 KM</td></tr>
-      </table>
-      <p style="font-family:sans-serif;color:#888;font-size:12px;margin-top:24px">Padel centar Hills · Butmirska cesta 18, Ilidža, Sarajevo · +387 61 532 892</p>
-    `;
-
-    try {
-      const res = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${RESEND_KEY}`,
-        },
-        body: JSON.stringify({
-          from: FROM_ADDR,
-          to: [CONTACT_TO],
-          subject: `Nova rezervacija — ${state.name} ${state.surname} · ${fmtDate(state.date)} · ${COURTS[state.courtIdx]}`,
-          html,
-        }),
-      });
-
-      if (res.ok) {
-        sendStatus.style.cssText = "padding:10px 14px;background:rgba(179,240,0,.1);border:1px solid rgba(179,240,0,.3);color:#b3f000;border-radius:8px;";
-        sendStatus.textContent = "✓ Potvrda uspješno poslana!";
-        newBtn.disabled = true;
-        newBtn.innerHTML = `✓ Poslano`;
-      } else {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || res.status);
-      }
-    } catch (err) {
-      sendStatus.style.cssText = "padding:10px 14px;background:rgba(255,59,59,.1);border:1px solid rgba(255,59,59,.3);color:#ff7070;border-radius:8px;";
-      sendStatus.textContent = `Greška pri slanju. Molimo nazovite: +387 61 532 892`;
-      newBtn.disabled = false;
-      newBtn.innerHTML = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="m22 6-10 7L2 6"/></svg> Pokušaj ponovo`;
-    }
-  });
+  if (mailBtn)    mailBtn.style.display    = "none";
+  if (sendStatus) sendStatus.style.display = "none";
 }
 document.getElementById("reset-btn").addEventListener("click", () => {
   Object.assign(state, { step:1, date:null, duration:null, courtIdx:null, startTime:null, name:"", surname:"", phone:"", racket:false });
