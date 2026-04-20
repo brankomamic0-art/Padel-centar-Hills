@@ -73,7 +73,7 @@ const state = {
   duration: null,    // 60 | 90 | 120
   courtIdx: null,
   startTime: null,   // "HH:MM"
-  name: "", surname: "", phone: "", racket: false,
+  name: "", surname: "", email: "", phone: "", racket: false,
   calMonth: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
 };
 
@@ -316,6 +316,7 @@ document.getElementById("booking-form").addEventListener("submit", (e) => {
   const fd = new FormData(e.target);
   state.name    = fd.get("name").toString().trim();
   state.surname = fd.get("surname").toString().trim();
+  state.email   = fd.get("email").toString().trim();
   state.phone   = fd.get("phone").toString().trim();
   state.racket  = !!fd.get("racket");
 
@@ -331,7 +332,7 @@ document.getElementById("booking-form").addEventListener("submit", (e) => {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       name:    `${state.name} ${state.surname}`,
-      email:   "",
+      email:   state.email,
       phone:   state.phone,
       message: `REZERVACIJA TERENA\nTeren: ${COURTS[state.courtIdx]}\nDatum: ${fmtDate(state.date)}\nTermin: ${state.startTime} – ${calcEndTime()}\nTrajanje: ${state.duration} min\nCijena: ${price},00 KM${state.racket ? "\nReket: Da (+5,00 KM)" : ""}\nUKUPNO: ${total},00 KM`,
     }),
@@ -350,7 +351,7 @@ function renderSuccessStep(){
   if (sendStatus) sendStatus.style.display = "none";
 }
 document.getElementById("reset-btn").addEventListener("click", () => {
-  Object.assign(state, { step:1, date:null, duration:null, courtIdx:null, startTime:null, name:"", surname:"", phone:"", racket:false });
+  Object.assign(state, { step:1, date:null, duration:null, courtIdx:null, startTime:null, name:"", surname:"", email:"", phone:"", racket:false });
   renderCalendar();
   goStep(1);
 });
