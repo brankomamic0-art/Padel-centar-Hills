@@ -48,8 +48,16 @@ input:focus { border-color:var(--accent); }
 
 .main { padding:28px 24px; max-width:960px; margin:0 auto; }
 
+/* ── Page tabs ── */
+.page-tabs { display:flex; gap:4px; margin-bottom:24px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:4px; width:fit-content; }
+.page-tab { background:transparent; border:none; color:var(--muted); border-radius:9px; padding:8px 20px; font-size:14px; font-weight:600; cursor:pointer; transition:all .15s; display:flex; align-items:center; gap:8px; }
+.page-tab:hover { color:var(--fg); }
+.page-tab.active { background:var(--bg); color:var(--fg); box-shadow:0 1px 4px rgba(0,0,0,.4); }
+.page-tab .tab-count { background:rgba(179,240,0,.2); color:var(--accent); border-radius:20px; font-size:11px; font-weight:700; padding:1px 8px; }
+.page-tab.active .tab-count { background:rgba(179,240,0,.25); }
+
 /* ── Stats ── */
-.stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:28px; }
+.stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:24px; }
 .stat { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:16px 20px; }
 .stat-val { font-size:28px; font-weight:800; line-height:1; }
 .stat-lbl { font-size:12px; color:var(--muted); margin-top:4px; font-weight:500; }
@@ -62,28 +70,26 @@ input:focus { border-color:var(--accent); }
 .filter-btn { background:var(--surface); border:1px solid var(--border); color:var(--muted); border-radius:20px; padding:5px 16px; font-size:13px; cursor:pointer; font-weight:500; transition:all .15s; }
 .filter-btn:hover, .filter-btn.active { border-color:var(--accent); color:var(--fg); }
 .filter-btn.active { background:rgba(179,240,0,.1); }
-#refresh-btn { margin-left:auto; }
+.refresh-btn { margin-left:auto; }
 
 .section-title { font-size:16px; font-weight:700; margin-bottom:14px; }
+.list { display:flex; flex-direction:column; gap:10px; }
 
 /* ── Cards ── */
-.list { display:flex; flex-direction:column; gap:10px; }
 .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:18px 20px; transition:border-color .15s; }
 .card:hover { border-color:#30363d; }
 .card.pending  { border-left:3px solid var(--yellow); }
 .card.accepted { border-left:3px solid var(--green); }
 .card.rejected { border-left:3px solid var(--red); opacity:.7; }
-
 .card-top { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; }
 .card-name { font-weight:700; font-size:15px; }
-.card-email { color:var(--muted); font-size:13px; }
-.card-phone { color:var(--muted); font-size:13px; }
-.card-msg { margin-top:12px; padding:12px 14px; background:rgba(255,255,255,.04); border-radius:8px; color:var(--fg); font-size:13px; line-height:1.6; white-space:pre-wrap; word-break:break-word; }
+.card-sub { color:var(--muted); font-size:13px; }
+.card-msg { margin-top:12px; padding:12px 14px; background:rgba(255,255,255,.04); border-radius:8px; font-size:13px; line-height:1.6; white-space:pre-wrap; word-break:break-word; }
 .card-footer { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-top:14px; }
 .card-meta { font-size:11px; color:var(--muted); }
 .card-actions { display:flex; gap:8px; flex-wrap:wrap; }
 
-.status-badge { display:inline-flex; align-items:center; border-radius:20px; padding:3px 12px; font-size:12px; font-weight:600; letter-spacing:.03em; }
+.status-badge { display:inline-flex; align-items:center; border-radius:20px; padding:3px 12px; font-size:12px; font-weight:600; }
 .status-pending  { background:rgba(210,153,34,.15); color:var(--yellow); }
 .status-accepted { background:rgba(63,185,80,.15);  color:var(--green); }
 .status-rejected { background:rgba(248,81,73,.15);  color:var(--red); }
@@ -93,7 +99,7 @@ input:focus { border-color:var(--accent); }
 .action-btn.accept:hover { background:rgba(63,185,80,.15); }
 .action-btn.reject { border-color:var(--red); color:var(--red); }
 .action-btn.reject:hover { background:rgba(248,81,73,.15); }
-.action-btn.del { border-color:var(--border); color:var(--muted); }
+.action-btn.del { color:var(--muted); }
 .action-btn.del:hover { border-color:var(--red); color:var(--red); }
 .action-btn:disabled { opacity:.4; cursor:not-allowed; }
 
@@ -114,24 +120,14 @@ input:focus { border-color:var(--accent); }
 <div id="login-screen">
   <div class="login-card">
     <div class="logo">
-      <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
-        <circle cx="16" cy="16" r="16" fill="#b3f000" fill-opacity=".12"/>
-        <circle cx="16" cy="16" r="8"  fill="#b3f000" fill-opacity=".5"/>
-        <circle cx="16" cy="16" r="3"  fill="#b3f000"/>
-      </svg>
+      <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="16" fill="#b3f000" fill-opacity=".12"/><circle cx="16" cy="16" r="8" fill="#b3f000" fill-opacity=".5"/><circle cx="16" cy="16" r="3" fill="#b3f000"/></svg>
       PADEL CENTAR <em>HILLS</em>
     </div>
     <h1>Admin pristup</h1>
     <p>Unesite korisničke podatke za pristup upravljačkoj ploči.</p>
     <form id="login-form" novalidate>
-      <div class="field">
-        <label for="uname">Korisničko ime</label>
-        <input id="uname" type="text" autocomplete="username" required>
-      </div>
-      <div class="field">
-        <label for="upass">Lozinka</label>
-        <input id="upass" type="password" autocomplete="current-password" required>
-      </div>
+      <div class="field"><label for="uname">Korisničko ime</label><input id="uname" type="text" autocomplete="username" required></div>
+      <div class="field"><label for="upass">Lozinka</label><input id="upass" type="password" autocomplete="current-password" required></div>
       <button type="submit" class="btn-primary" id="login-btn">Prijava</button>
       <div id="login-error"></div>
     </form>
@@ -142,11 +138,7 @@ input:focus { border-color:var(--accent); }
 <div id="dashboard">
   <header class="topbar">
     <div class="topbar-brand">
-      <svg width="22" height="22" viewBox="0 0 32 32" fill="none">
-        <circle cx="16" cy="16" r="16" fill="#b3f000" fill-opacity=".12"/>
-        <circle cx="16" cy="16" r="8"  fill="#b3f000" fill-opacity=".5"/>
-        <circle cx="16" cy="16" r="3"  fill="#b3f000"/>
-      </svg>
+      <svg width="22" height="22" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="16" fill="#b3f000" fill-opacity=".12"/><circle cx="16" cy="16" r="8" fill="#b3f000" fill-opacity=".5"/><circle cx="16" cy="16" r="3" fill="#b3f000"/></svg>
       PADEL CENTAR <em>HILLS</em>
       <span class="badge">ADMIN</span>
     </div>
@@ -154,129 +146,177 @@ input:focus { border-color:var(--accent); }
   </header>
 
   <div class="main">
-    <div class="stats">
-      <div class="stat pending" ><div class="stat-val" id="cnt-pending">0</div><div class="stat-lbl">Na čekanju</div></div>
-      <div class="stat accepted"><div class="stat-val" id="cnt-accepted">0</div><div class="stat-lbl">Prihvaćeno</div></div>
-      <div class="stat rejected"><div class="stat-val" id="cnt-rejected">0</div><div class="stat-lbl">Odbijeno</div></div>
-      <div class="stat"         ><div class="stat-val" id="cnt-total">0</div><div class="stat-lbl">Ukupno</div></div>
+
+    <!-- Page tabs -->
+    <div class="page-tabs">
+      <button class="page-tab active" data-page="bookings">
+        📅 Rezervacije <span class="tab-count" id="tab-count-bookings">0</span>
+      </button>
+      <button class="page-tab" data-page="contacts">
+        ✉️ Članstvo / Škola <span class="tab-count" id="tab-count-contacts">0</span>
+      </button>
     </div>
 
-    <div class="filters">
-      <button class="filter-btn active" data-filter="all">Sve</button>
-      <button class="filter-btn" data-filter="pending">Na čekanju</button>
-      <button class="filter-btn" data-filter="accepted">Prihvaćeno</button>
-      <button class="filter-btn" data-filter="rejected">Odbijeno</button>
-      <button class="filter-btn" id="refresh-btn">↻ Osvježi</button>
+    <!-- ── BOOKINGS PAGE ── -->
+    <div id="page-bookings">
+      <div class="stats">
+        <div class="stat pending" ><div class="stat-val" id="b-cnt-pending">0</div><div class="stat-lbl">Na čekanju</div></div>
+        <div class="stat accepted"><div class="stat-val" id="b-cnt-accepted">0</div><div class="stat-lbl">Prihvaćeno</div></div>
+        <div class="stat rejected"><div class="stat-val" id="b-cnt-rejected">0</div><div class="stat-lbl">Odbijeno</div></div>
+        <div class="stat"         ><div class="stat-val" id="b-cnt-total">0</div><div class="stat-lbl">Ukupno</div></div>
+      </div>
+      <div class="filters">
+        <button class="filter-btn active" data-filter="all" data-scope="bookings">Sve</button>
+        <button class="filter-btn" data-filter="pending"  data-scope="bookings">Na čekanju</button>
+        <button class="filter-btn" data-filter="accepted" data-scope="bookings">Prihvaćeno</button>
+        <button class="filter-btn" data-filter="rejected" data-scope="bookings">Odbijeno</button>
+        <button class="filter-btn refresh-btn" data-scope="bookings">↻ Osvježi</button>
+      </div>
+      <div class="section-title">Rezervacije terena</div>
+      <div class="list" id="list-bookings"></div>
     </div>
 
-    <div class="section-title">Upiti s Kontakt forme</div>
-    <div class="list" id="contact-list"></div>
+    <!-- ── CONTACTS PAGE ── -->
+    <div id="page-contacts" style="display:none">
+      <div class="stats">
+        <div class="stat pending" ><div class="stat-val" id="c-cnt-pending">0</div><div class="stat-lbl">Na čekanju</div></div>
+        <div class="stat accepted"><div class="stat-val" id="c-cnt-accepted">0</div><div class="stat-lbl">Odgovoreno</div></div>
+        <div class="stat rejected"><div class="stat-val" id="c-cnt-rejected">0</div><div class="stat-lbl">Odbijeno</div></div>
+        <div class="stat"         ><div class="stat-val" id="c-cnt-total">0</div><div class="stat-lbl">Ukupno</div></div>
+      </div>
+      <div class="filters">
+        <button class="filter-btn active" data-filter="all" data-scope="contacts">Sve</button>
+        <button class="filter-btn" data-filter="pending"  data-scope="contacts">Na čekanju</button>
+        <button class="filter-btn" data-filter="accepted" data-scope="contacts">Odgovoreno</button>
+        <button class="filter-btn" data-filter="rejected" data-scope="contacts">Odbijeno</button>
+        <button class="filter-btn refresh-btn" data-scope="contacts">↻ Osvježi</button>
+      </div>
+      <div class="section-title">Upiti — Članstvo &amp; Škola</div>
+      <div class="list" id="list-contacts"></div>
+    </div>
+
   </div>
 </div>
 
 <script>
 let TOKEN = sessionStorage.getItem('admin_token') || '';
-let all   = [];
-let filter = 'all';
+let allBookings = [], allContacts = [];
+let filterBookings = 'all', filterContacts = 'all';
+let activePage = 'bookings';
 
 // ── Login ──────────────────────────────────────────────────────────────────────
 document.getElementById('login-form').addEventListener('submit', async e => {
   e.preventDefault();
   const btn = document.getElementById('login-btn');
   const err = document.getElementById('login-error');
-  btn.disabled = true;
-  btn.textContent = 'Prijava…';
-  err.textContent = '';
+  btn.disabled = true; btn.textContent = 'Prijava…'; err.textContent = '';
   try {
     const r = await fetch('/api/admin/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        username: document.getElementById('uname').value.trim(),
-        password: document.getElementById('upass').value,
-      }),
+      body: JSON.stringify({ username: document.getElementById('uname').value.trim(), password: document.getElementById('upass').value }),
     });
     const d = await r.json();
-    if (d.ok) {
-      TOKEN = d.token;
-      sessionStorage.setItem('admin_token', TOKEN);
-      showDashboard();
-    } else {
-      err.textContent = 'Pogrešno korisničko ime ili lozinka.';
-    }
-  } catch {
-    err.textContent = 'Greška veze. Pokušajte ponovo.';
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Prijava';
-  }
+    if (d.ok) { TOKEN = d.token; sessionStorage.setItem('admin_token', TOKEN); showDashboard(); }
+    else err.textContent = 'Pogrešno korisničko ime ili lozinka.';
+  } catch { err.textContent = 'Greška veze.'; }
+  finally { btn.disabled = false; btn.textContent = 'Prijava'; }
 });
 
 document.getElementById('logout-btn').addEventListener('click', () => {
-  TOKEN = '';
-  sessionStorage.removeItem('admin_token');
+  TOKEN = ''; sessionStorage.removeItem('admin_token');
   document.getElementById('dashboard').style.display = 'none';
   document.getElementById('login-screen').style.display = 'flex';
 });
 
 if (TOKEN) showDashboard();
 
-// ── Dashboard ──────────────────────────────────────────────────────────────────
 async function showDashboard() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
   await load();
 }
 
+// ── Load all ──────────────────────────────────────────────────────────────────
 async function load() {
   try {
     const r = await fetch('/api/admin/contacts', { headers: { 'x-admin-token': TOKEN } });
     if (r.status === 401) { TOKEN = ''; sessionStorage.removeItem('admin_token'); location.reload(); return; }
-    all = await r.json();
-    render();
+    const all = await r.json();
+    allBookings = all.filter(c => c.type === 'booking');
+    allContacts = all.filter(c => c.type !== 'booking');
+    renderBookings(); renderContacts();
     updateStats();
   } catch { console.error('load failed'); }
 }
 
-document.getElementById('refresh-btn').addEventListener('click', load);
-
-document.querySelectorAll('.filter-btn[data-filter]').forEach(b => {
-  b.addEventListener('click', () => {
-    document.querySelectorAll('.filter-btn[data-filter]').forEach(x => x.classList.remove('active'));
-    b.classList.add('active');
-    filter = b.dataset.filter;
-    render();
+// ── Page tabs ─────────────────────────────────────────────────────────────────
+document.querySelectorAll('.page-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    activePage = btn.dataset.page;
+    document.querySelectorAll('.page-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('page-bookings').style.display = activePage === 'bookings' ? '' : 'none';
+    document.getElementById('page-contacts').style.display = activePage === 'contacts' ? '' : 'none';
   });
 });
 
-function render() {
-  const list = document.getElementById('contact-list');
-  const items = filter === 'all' ? all : all.filter(c => c.status === filter);
+// ── Filters ───────────────────────────────────────────────────────────────────
+document.querySelectorAll('.filter-btn[data-filter]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const scope = btn.dataset.scope;
+    document.querySelectorAll(`.filter-btn[data-scope="${scope}"][data-filter]`).forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    if (scope === 'bookings') { filterBookings = btn.dataset.filter; renderBookings(); }
+    else                      { filterContacts = btn.dataset.filter; renderContacts(); }
+  });
+});
+document.querySelectorAll('.refresh-btn').forEach(btn => btn.addEventListener('click', load));
 
+// ── Stats ─────────────────────────────────────────────────────────────────────
+function updateStats() {
+  const bPending  = allBookings.filter(c => c.status === 'pending').length;
+  const bAccepted = allBookings.filter(c => c.status === 'accepted').length;
+  const bRejected = allBookings.filter(c => c.status === 'rejected').length;
+  document.getElementById('b-cnt-pending').textContent  = bPending;
+  document.getElementById('b-cnt-accepted').textContent = bAccepted;
+  document.getElementById('b-cnt-rejected').textContent = bRejected;
+  document.getElementById('b-cnt-total').textContent    = allBookings.length;
+  document.getElementById('tab-count-bookings').textContent = bPending || '';
+
+  const cPending  = allContacts.filter(c => c.status === 'pending').length;
+  const cAccepted = allContacts.filter(c => c.status === 'accepted').length;
+  const cRejected = allContacts.filter(c => c.status === 'rejected').length;
+  document.getElementById('c-cnt-pending').textContent  = cPending;
+  document.getElementById('c-cnt-accepted').textContent = cAccepted;
+  document.getElementById('c-cnt-rejected').textContent = cRejected;
+  document.getElementById('c-cnt-total').textContent    = allContacts.length;
+  document.getElementById('tab-count-contacts').textContent = cPending || '';
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function renderBookings() { renderList('list-bookings', allBookings, filterBookings); }
+function renderContacts() { renderList('list-contacts', allContacts, filterContacts); }
+
+function renderList(containerId, data, filter) {
+  const el = document.getElementById(containerId);
+  const items = filter === 'all' ? data : data.filter(c => c.status === filter);
   if (!items.length) {
-    list.innerHTML = `<div class="empty">
-      <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-      </svg>
-      <p>Nema upita u ovoj kategoriji.</p>
-    </div>`;
+    el.innerHTML = `<div class="empty"><svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><p>Nema upita u ovoj kategoriji.</p></div>`;
     return;
   }
-
   const labels = { pending:'Na čekanju', accepted:'Prihvaćeno', rejected:'Odbijeno' };
-  list.innerHTML = items.map(c => {
-    const date = new Date(c.createdAt).toLocaleString('hr-HR', {
-      day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'
-    });
-    const phone = c.phone ? `<div class="card-phone">Tel: ${esc(c.phone)}</div>` : '';
+  el.innerHTML = items.map(c => {
+    const date = new Date(c.created_at).toLocaleString('hr-HR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    const emailLine = c.email ? `<div class="card-sub">${esc(c.email)}</div>` : '';
+    const phoneLine = c.phone ? `<div class="card-sub">Tel: ${esc(c.phone)}</div>` : '';
     return `<div class="card ${c.status}" data-id="${c.id}">
       <div class="card-top">
         <div>
           <div class="card-name">${esc(c.name)}</div>
-          <div class="card-email">${esc(c.email)}</div>
-          ${phone}
+          ${emailLine}${phoneLine}
         </div>
-        <span class="status-badge status-${c.status}">${labels[c.status] || c.status}</span>
+        <span class="status-badge status-${c.status}">${labels[c.status]||c.status}</span>
       </div>
       <div class="card-msg">${esc(c.message)}</div>
       <div class="card-footer">
@@ -291,13 +331,6 @@ function render() {
   }).join('');
 }
 
-function updateStats() {
-  document.getElementById('cnt-total').textContent    = all.length;
-  document.getElementById('cnt-pending').textContent  = all.filter(c => c.status === 'pending').length;
-  document.getElementById('cnt-accepted').textContent = all.filter(c => c.status === 'accepted').length;
-  document.getElementById('cnt-rejected').textContent = all.filter(c => c.status === 'rejected').length;
-}
-
 async function setStatus(id, status) {
   document.querySelector(`[data-id="${id}"]`)?.querySelectorAll('.action-btn').forEach(b => b.disabled = true);
   await fetch(`/api/admin/contacts/${id}`, {
@@ -310,19 +343,12 @@ async function setStatus(id, status) {
 
 async function del(id) {
   if (!confirm('Obrisati ovaj upit?')) return;
-  await fetch(`/api/admin/contacts/${id}`, {
-    method: 'DELETE',
-    headers: { 'x-admin-token': TOKEN },
-  });
+  await fetch(`/api/admin/contacts/${id}`, { method: 'DELETE', headers: { 'x-admin-token': TOKEN } });
   await load();
 }
 
 function esc(s) {
-  return String(s)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 </script>
 </body>

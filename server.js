@@ -11,7 +11,7 @@ const STATIC_DIR = path.join(__dirname, 'ui_kits', 'website');
 
 const ADMIN_USER  = process.env.ADMIN_USER  || 'vlasnik';
 const ADMIN_PASS  = process.env.ADMIN_PASS  || 'H!lls826';
-const RESEND_KEY  = process.env.RESEND_KEY  || 're_eZu4mNme_Kgpp1EYwcYAffevBDLtQYyy6';
+const RESEND_KEY  = process.env.RESEND_KEY  || 're_12u6jGHZ_KbjnD9kFzhu88FvBMFagA4tp';
 const FROM_EMAIL  = 'Padel centar Hills <noreply@mamicwebdesign.com>';
 
 function sha256(s) {
@@ -36,9 +36,12 @@ db.exec(`
     name       TEXT    NOT NULL,
     email      TEXT    NOT NULL DEFAULT '',
     phone      TEXT    NOT NULL DEFAULT '',
-    message    TEXT    NOT NULL
+    message    TEXT    NOT NULL,
+    type       TEXT    NOT NULL DEFAULT 'contact'
   )
 `);
+// Add type column if upgrading from older schema
+try { db.exec("ALTER TABLE contacts ADD COLUMN type TEXT NOT NULL DEFAULT 'contact'"); } catch {}
 console.log(`DB ready at ${DB_PATH}`);
 
 // ── Middleware ────────────────────────────────────────────────────────────────
@@ -60,14 +63,14 @@ function authGuard(req, res, next) {
 
 // ── Public: save contact/booking query ───────────────────────────────────────
 app.post('/api/contact', (req, res) => {
-  const { name, email = '', phone = '', message } = req.body;
+  const { name, email = '', phone = '', message, type = 'contact' } = req.body;
   if (!name || !message)
     return res.status(400).json({ ok: false, error: 'Nedostaju podaci' });
 
   const id = Date.now().toString(36) + crypto.randomBytes(2).toString('hex');
   db.prepare(
-    'INSERT INTO contacts (id, name, email, phone, message) VALUES (?,?,?,?,?)'
-  ).run(id, name, email, phone, message);
+    'INSERT INTO contacts (id, name, email, phone, message, type) VALUES (?,?,?,?,?,?)'
+  ).run(id, name, email, phone, message, type);
 
   res.json({ ok: true, id });
 });

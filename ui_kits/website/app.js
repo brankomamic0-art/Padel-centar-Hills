@@ -335,6 +335,7 @@ document.getElementById("booking-form").addEventListener("submit", (e) => {
       email:   state.email,
       phone:   state.phone,
       message: `REZERVACIJA TERENA\nTeren: ${COURTS[state.courtIdx]}\nDatum: ${fmtDate(state.date)}\nTermin: ${state.startTime} – ${calcEndTime()}\nTrajanje: ${state.duration} min\nCijena: ${price},00 KM${state.racket ? "\nReket: Da (+5,00 KM)" : ""}\nUKUPNO: ${total},00 KM`,
+      type:    'booking',
     }),
   }).catch(() => {});
 
@@ -407,7 +408,7 @@ kfForm?.addEventListener("submit", async (e) => {
     await fetch("/api/contact", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, phone, message }),
+      body: JSON.stringify({ name, email, phone, message, type: 'contact' }),
     }).catch(() => {});
 
     // Also send email notification via Resend
