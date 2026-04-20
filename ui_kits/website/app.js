@@ -450,6 +450,14 @@ kfForm?.addEventListener("submit", async (e) => {
   `;
 
   try {
+    // Save to server (admin panel reads this)
+    await fetch("/api/contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, phone, message }),
+    }).catch(() => {});
+
+    // Also send email notification via Resend
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
