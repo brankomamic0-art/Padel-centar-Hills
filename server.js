@@ -1,7 +1,8 @@
 const express = require('express');
-const { Pool } = require('pg');
-const path    = require('path');
-const crypto  = require('crypto');
+const Database = require('better-sqlite3');
+const path     = require('path');
+const crypto   = require('crypto');
+const fs       = require('fs');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -17,26 +18,26 @@ function sha256(s) {
 const ADMIN_HASH = sha256(ADMIN_PASS);
 const sessions   = new Set();
 
-// ── Database ──────────────────────────────────────────────────────────────────
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false,
-});
+// ── Database (SQLite) ─────────────────────────────────────────────────────────
+// Use /data if a Railway Volume is mounted there, otherwise fall back to local
+const DB_DIR  = fs.existsSync('/data') ? '/data' : __dirname;
+const DB_PATH = path.join(DB_DIR, 'contacts.db');
 
-async function initDB() {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS contacts (
-      id         TEXT        PRIMARY KEY,
-      status     TEXT        NOT NULL DEFAULT 'pending',
-      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      name       TEXT        NOT NULL,
-      email      TEXT        NOT NULL DEFAULT '',
-      phone      TEXT        NOT NULL DEFAULT '',
-      message    TEXT        NOT NULL
-    )
-  `);
-  console.log('DB ready');
-}
+const db = new Database(DB_PATH);
+db.pragma('journal_mode = WAL');
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS contacts (
+    id         TEXT    PRIMARY KEY,
+    status     TEXT    NOT NULL DEFAULT 'pending',
+    created_at TEXT    NOT NULL DEFAULT (datetime('now')),
+    name       TEXT    NOT NULL,
+    email      TEXT    NOT NULL DEFAULT '',
+    phone      TEXT    NOT NULL DEFAULT '',
+    message    TEXT    NOT NULL
+  )
+`);
+console.log(`DB ready at ${DB_PATH}`);
 
 // ── Middleware ────────────────────────────────────────────────────────────────
 app.use(express.json());
@@ -56,16 +57,16 @@ function authGuard(req, res, next) {
 }
 
 // ── Public: save contact/booking query ───────────────────────────────────────
-app.post('/api/contact', async (req, res) => {
+app.post('/api/contact', (req, res) => {
   const { name, email = '', phone = '', message } = req.body;
   if (!name || !message)
     return res.status(400).json({ ok: false, error: 'Nedostaju podaci' });
 
   const id = Date.now().toString(36) + crypto.randomBytes(2).toString('hex');
-  await pool.query(
-    'INSERT INTO contacts (id, name, email, phone, message) VALUES ($1,$2,$3,$4,$5)',
-    [id, name, email, phone, message]
-  );
+  db.prepare(
+    'INSERT INTO contacts (id, name, email, phone, message) VALUES (?,?,?,?,?)'
+  ).run(id, name, email, phone, message);
+
   res.json({ ok: true, id });
 });
 
@@ -81,38 +82,33 @@ app.post('/api/admin/login', (req, res) => {
 });
 
 // ── Admin: list all contacts ──────────────────────────────────────────────────
-app.get('/api/admin/contacts', authGuard, async (_req, res) => {
-  const { rows } = await pool.query(
+app.get('/api/admin/contacts', authGuard, (_req, res) => {
+  const rows = db.prepare(
     'SELECT * FROM contacts ORDER BY created_at DESC'
-  );
+  ).all();
   res.json(rows);
 });
 
 // ── Admin: update status ──────────────────────────────────────────────────────
-app.patch('/api/admin/contacts/:id', authGuard, async (req, res) => {
+app.patch('/api/admin/contacts/:id', authGuard, (req, res) => {
   const { status } = req.body;
   if (!['pending', 'accepted', 'rejected'].includes(status))
     return res.status(400).json({ ok: false, error: 'Nevaljan status' });
 
-  const { rowCount } = await pool.query(
-    'UPDATE contacts SET status=$1 WHERE id=$2',
-    [status, req.params.id]
-  );
-  if (!rowCount) return res.status(404).json({ ok: false, error: 'Nije pronađeno' });
+  const info = db.prepare(
+    'UPDATE contacts SET status=? WHERE id=?'
+  ).run(status, req.params.id);
+
+  if (!info.changes) return res.status(404).json({ ok: false, error: 'Nije pronađeno' });
   res.json({ ok: true });
 });
 
 // ── Admin: delete ─────────────────────────────────────────────────────────────
-app.delete('/api/admin/contacts/:id', authGuard, async (req, res) => {
-  const { rowCount } = await pool.query(
-    'DELETE FROM contacts WHERE id=$1',
-    [req.params.id]
-  );
-  if (!rowCount) return res.status(404).json({ ok: false });
+app.delete('/api/admin/contacts/:id', authGuard, (req, res) => {
+  const info = db.prepare('DELETE FROM contacts WHERE id=?').run(req.params.id);
+  if (!info.changes) return res.status(404).json({ ok: false });
   res.json({ ok: true });
 });
 
 // ── Start ─────────────────────────────────────────────────────────────────────
-initDB()
-  .then(() => app.listen(PORT, () => console.log(`Running on :${PORT}`)))
-  .catch(err => { console.error('DB init failed:', err); process.exit(1); });
+app.listen(PORT, () => console.log(`Running on :${PORT}`));
