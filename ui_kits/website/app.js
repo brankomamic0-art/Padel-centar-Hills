@@ -392,49 +392,19 @@ kfForm?.addEventListener("submit", async (e) => {
   kfStatus.className = "kf-status";
   kfStatus.textContent = "";
 
-  const html = `
-    <h2 style="font-family:sans-serif;margin:0 0 16px">Nova poruka s web forme — Padel centar Hills</h2>
-    <table style="font-family:sans-serif;font-size:15px;border-collapse:collapse;width:100%;max-width:520px">
-      <tr><td style="padding:8px 12px;background:#f6f8fa;font-weight:600;width:140px">Ime i prezime</td><td style="padding:8px 12px">${name}</td></tr>
-      <tr><td style="padding:8px 12px;background:#f6f8fa;font-weight:600">Email</td><td style="padding:8px 12px"><a href="mailto:${email}">${email}</a></td></tr>
-      <tr><td style="padding:8px 12px;background:#f6f8fa;font-weight:600">Telefon</td><td style="padding:8px 12px">${phone || "—"}</td></tr>
-      <tr><td style="padding:8px 12px;background:#f6f8fa;font-weight:600;vertical-align:top">Poruka</td><td style="padding:8px 12px;white-space:pre-wrap">${message.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</td></tr>
-    </table>
-    <p style="font-family:sans-serif;color:#888;font-size:12px;margin-top:24px">Padel centar Hills · Butmirska cesta 18, Ilidža, Sarajevo</p>
-  `;
-
   try {
-    // Save to server (admin panel reads this)
-    await fetch("/api/contact", {
+    const res = await fetch("/api/contact", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, email, phone, message, type: 'contact' }),
-    }).catch(() => {});
-
-    // Also send email notification via Resend
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${RESEND_KEY}`,
-      },
-      body: JSON.stringify({
-        from: FROM_ADDR,
-        to: [CONTACT_TO],
-        reply_to: email,
-        subject: `Nova poruka od ${name} — Padel centar Hills`,
-        html,
-      }),
     });
-
     if (res.ok) {
       setStatus("ok", "Poruka uspješno poslana! Javit ćemo vam se uskoro.");
       kfForm.reset();
     } else {
-      const err = await res.json().catch(() => ({}));
-      setStatus("err", `Greška pri slanju: ${err.message || res.status}. Pokušajte nazvati: +387 61 532 892`);
+      setStatus("err", "Greška pri slanju. Pokušajte nazvati: +387 61 532 892");
     }
-  } catch (err) {
+  } catch {
     setStatus("err", "Mrežna greška. Molimo nazovite: +387 61 532 892");
   } finally {
     kfSubmit.disabled = false;
